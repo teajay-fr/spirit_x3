@@ -18,6 +18,7 @@
 #include <boost/fusion/include/front.hpp>
 #include <boost/fusion/include/size.hpp>
 #include <boost/fusion/include/move.hpp>
+#include <iterator>
 #include <utility>
 
 namespace boost { namespace spirit { namespace traits
@@ -65,7 +66,7 @@ namespace boost { namespace spirit { namespace traits
         inline typename enable_if<is_container<Source>>::type
         move_to(Source& src, Dest& dest, container_attribute)
         {
-            traits::move_to(src.begin(), src.end(), dest);
+            traits::move_to(std::begin(src), std::end(src), dest);
         }
 
         template <typename T>
