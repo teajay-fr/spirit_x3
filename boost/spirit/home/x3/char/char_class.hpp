@@ -48,7 +48,7 @@ namespace boost { namespace spirit { namespace x3
         {                                                                       \
             return Encoding::is##name                                           \
                 BOOST_PREVENT_MACRO_SUBSTITUTION                                \
-                    (detail::cast_char<char_type>(ch));                         \
+                    (detail::cast_char<char_type>(ch)) != 0;                    \
         }                                                                       \
         /***/
 
