@@ -25,6 +25,10 @@
 #include <boost/utility/enable_if.hpp>
 #include <string>
 
+#if !defined(BOOST_SPIRIT_NO_RTTI)
+#include <typeinfo>
+#endif
+
 namespace boost { namespace spirit { namespace x3 {
     
     template<
@@ -75,12 +79,20 @@ namespace boost { namespace spirit { namespace x3 {
         typedef context<skipper_tag, Skipper const> context_type;
 
         typedef any_rule_parser<Iterator, Attribute, Skipper> parser_type;
-
+        
+#if !defined(BOOST_SPIRIT_NO_RTTI)
+        any_rule(char const* name = typeid(any_rule).name())
+#else
         any_rule(char const* name = "unnamed")
+#endif
           : _content(nullptr), _name(name) {}
 
         template <typename Expr>
+#if !defined(BOOST_SPIRIT_NO_RTTI)
+        explicit any_rule(Expr const& expr, char const* name = typeid(any_rule).name())
+#else
         explicit any_rule(Expr const& expr, char const* name = "unnamed")
+#endif
           : _content(make_holder(expr)), _name(name) {}
 
         ~any_rule() { delete _content; }
