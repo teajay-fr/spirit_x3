@@ -1,13 +1,11 @@
-/**
- * Ki <boost/spirit/home/x3/nonterminal/any_rule.hpp>
- * 
- * Copyright Agustín Bergé, Fusion Fenix 2013
- * 
- * Distributed under the Boost Software License, Version 1.0. (See accompanying
- * file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
- * 
- * Ki home page: http://github.com/K-ballo/ki
- */
+/*=============================================================================
+    Copyright (c) 2001-2011 Joel de Guzman
+    Copyright (c) 2013 Agustín Bergé
+
+    Distributed under the Boost Software License, Version 1.0. (See accompanying
+    file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+==============================================================================*/
+
 #ifndef BOOST_SPIRIT_X3_NONTERMINAL_ANY_RULE_HPP
 #define BOOST_SPIRIT_X3_NONTERMINAL_ANY_RULE_HPP
 
