@@ -9,6 +9,10 @@
 #ifndef BOOST_SPIRIT_X3_NONTERMINAL_ANY_RULE_HPP
 #define BOOST_SPIRIT_X3_NONTERMINAL_ANY_RULE_HPP
 
+#if defined(_MSC_VER)
+#pragma once
+#endif
+
 #include <boost/assert.hpp>
 
 #include <boost/spirit/home/x3/core/parser.hpp>

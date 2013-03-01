@@ -11,6 +11,10 @@
 #ifndef BOOST_SPIRIT_X3_DIRECTIVE_AS_HPP
 #define BOOST_SPIRIT_X3_DIRECTIVE_AS_HPP
 
+#if defined(_MSC_VER)
+#pragma once
+#endif
+
 #include <boost/spirit/home/x3/core/parser.hpp>
 #include <boost/spirit/home/support/unused.hpp>
 #include <boost/spirit/home/support/traits/container_traits.hpp>
