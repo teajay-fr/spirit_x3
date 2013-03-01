@@ -14,22 +14,15 @@
 #endif
 
 #include <boost/assert.hpp>
-
 #include <boost/spirit/home/x3/core/parser.hpp>
-
 #include <boost/spirit/home/support/context.hpp>
 #include <boost/spirit/home/support/unused.hpp>
-
 #include <boost/spirit/home/support/traits/container_traits.hpp>
-
 #include <boost/static_assert.hpp>
-
 #include <boost/type_traits/decay.hpp>
 #include <boost/type_traits/is_base_of.hpp>
 #include <boost/type_traits/is_same.hpp>
-
 #include <boost/utility/enable_if.hpp>
-
 #include <string>
 
 namespace boost { namespace spirit { namespace x3 {
