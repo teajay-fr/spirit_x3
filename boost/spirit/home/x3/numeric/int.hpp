@@ -4,8 +4,8 @@
     Distributed under the Boost Software License, Version 1.0. (See accompanying
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 ==============================================================================*/
-#if !defined(BOOST_SPIRIT_INT_APR_17_2006_0830AM)
-#define BOOST_SPIRIT_INT_APR_17_2006_0830AM
+#ifndef BOOST_SPIRIT_X3_NUMERIC_INT_HPP
+#define BOOST_SPIRIT_X3_NUMERIC_INT_HPP
 
 #if defined(_MSC_VER)
 #pragma once
@@ -13,7 +13,7 @@
 
 #include <boost/spirit/home/x3/core/parser.hpp>
 #include <boost/spirit/home/x3/core/skip_over.hpp>
-#include <boost/spirit/home/support/numeric_utils/extract_int.hpp>
+#include <boost/spirit/home/x3/numeric/int_policies.hpp>
 #include <cstdint>
 
 namespace boost { namespace spirit { namespace x3
@@ -23,24 +23,52 @@ namespace boost { namespace spirit { namespace x3
         typename T
       , unsigned Radix = 10
       , unsigned MinDigits = 1
-      , int MaxDigits = -1>
-    struct int_parser : parser<int_parser<T, Radix, MinDigits, MaxDigits>>
+      , int MaxDigits = -1
+      , typename Policies = int_policies<T, Radix, MinDigits, MaxDigits>>
+    struct int_parser
+      : parser<int_parser<T, Radix, MinDigits, MaxDigits, Policies>>
+      , Policies
     {
-        // check template parameter 'Radix' for validity
-        static_assert(
-            (Radix == 2 || Radix == 8 || Radix == 10 || Radix == 16),
-            "Error Unsupported Radix");
-
         typedef T attribute_type;
         static bool const has_attribute = true;
+        
+        int_parser() {}
+        int_parser(Policies const& p)
+          : Policies(p) {}
 
+        template <typename Iterator, typename Context>
+        bool parse(Iterator& first, Iterator const& last
+          , Context const& context, attribute_type& attr) const
+        {
+            x3::skip_over(first, last, context);
+            
+            bool hit = true;
+            Iterator save = first;
+            
+            bool sign = true;
+            hit = Policies::parse_sign(first, last, sign);
+            if(hit)
+                hit = Policies::parse_n(first, last, sign, attr);
+
+            if (!hit)
+            {
+                first = save;
+                return false;
+            }
+            return true;
+        }
         template <typename Iterator, typename Context, typename Attribute>
         bool parse(Iterator& first, Iterator const& last
-          , Context const& context, Attribute& attr) const
+          , Context const& context, Attribute& attr_) const
         {
-            typedef extract_int<T, Radix, MinDigits, MaxDigits> extract;
-            x3::skip_over(first, last, context);
-            return extract::call(first, last, attr);
+            // this case is called when Attribute is not T
+            attribute_type attr;
+            if (parse(first, last, context, attr))
+            {
+                traits::move_to(attr, attr_);
+                return true;
+            }
+            return false;
         }
     };
 
