@@ -16,6 +16,7 @@
 #include <boost/assert.hpp>
 #include <boost/spirit/home/x3/core/parser.hpp>
 #include <boost/spirit/home/support/context.hpp>
+#include <boost/spirit/home/support/context_map.hpp>
 #include <boost/spirit/home/support/unused.hpp>
 #include <boost/spirit/home/support/traits/container_traits.hpp>
 #include <boost/static_assert.hpp>
@@ -34,14 +35,14 @@ namespace boost { namespace spirit { namespace x3 {
     template<
         typename Iterator
       , typename Attribute = unused_type
-      , typename Skipper = unused_type
+      , typename ContextMap = context_map<>
     >
     struct any_rule;
 
-    template<typename Iterator, typename Attribute, typename Skipper>
-    struct any_rule_parser : parser<any_rule_parser<Iterator, Attribute, Skipper>>
+    template<typename Iterator, typename Attribute, typename ContextMap>
+    struct any_rule_parser : parser<any_rule_parser<Iterator, Attribute, ContextMap>>
     {
-        typedef any_rule<Iterator, Attribute, Skipper> rule_type;
+        typedef any_rule<Iterator, Attribute, ContextMap> rule_type;
         
         typedef Attribute attribute_type;
 
@@ -70,15 +71,14 @@ namespace boost { namespace spirit { namespace x3 {
 
     struct any_rule_base {};
 
-    template <typename Iterator, typename Attribute, typename Skipper>
+    template <typename Iterator, typename Attribute, typename ContextMap>
     struct any_rule : any_rule_base
     {
         typedef Iterator iterator_type;
         typedef Attribute attribute_type;
-        typedef Skipper skipper_type;
-        typedef context<skipper_tag, Skipper const> context_type;
+        typedef ContextMap context_type;
 
-        typedef any_rule_parser<Iterator, Attribute, Skipper> parser_type;
+        typedef any_rule_parser<Iterator, Attribute, ContextMap> parser_type;
         
 #if !defined(BOOST_SPIRIT_NO_RTTI)
         any_rule(char const* name = typeid(any_rule).name())
@@ -122,18 +122,11 @@ namespace boost { namespace spirit { namespace x3 {
               , "Incompatible iterator used"
             );
 
-            auto skipper = spirit::get<skipper_tag>(context);
-            typedef typename decay<decltype(skipper)>::type Skipper_;
-            BOOST_STATIC_ASSERT_MSG(
-                (is_same<skipper_type, Skipper_>::value)
-              , "Incompatible skipper used"
-            );
-            
             BOOST_ASSERT_MSG(
                 (_content != nullptr)
               , "Invalid use of uninitialized any_rule"
             );
-            return _content->parse(first, last, skipper, attr);
+            return _content->parse(first, last, context, attr);
         }
         template<typename Iterator_, typename Context, typename Attribute_>
         bool parse(Iterator_& first, Iterator_ const& last
@@ -208,12 +201,12 @@ namespace boost { namespace spirit { namespace x3 {
         any_rule(any_rule const&);
     };
     
-    template <typename Iterator, typename Attribute, typename Skipper>
-    struct get_info<any_rule< Iterator, Attribute, Skipper>>
+    template <typename Iterator, typename Attribute, typename ContextMap>
+    struct get_info<any_rule< Iterator, Attribute, ContextMap>>
     {
         typedef std::string result_type;
         std::string operator()(
-            any_rule<Iterator, Attribute, Skipper> const& parser ) const
+            any_rule<Iterator, Attribute, ContextMap> const& parser ) const
         {
             return parser.get_info();
         }

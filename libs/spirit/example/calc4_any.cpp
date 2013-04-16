@@ -192,9 +192,18 @@ namespace client
         using x3::uint_;
         using x3::char_;
 
-        x3::any_rule<std::string::const_iterator, ast::program, boost::spirit::x3::ascii::space_type> expression("expression");
-        x3::any_rule<std::string::const_iterator, ast::program, boost::spirit::x3::ascii::space_type> term("term");
-        x3::any_rule<std::string::const_iterator, ast::operand, boost::spirit::x3::ascii::space_type> factor("factor");
+        typedef
+            boost::spirit::context_map<
+                boost::fusion::pair<
+                    boost::spirit::x3::skipper_tag
+                  , boost::spirit::x3::ascii::space_type const
+                >
+            >
+            subcontext_type;
+
+        x3::any_rule<std::string::const_iterator, ast::program, subcontext_type> expression("expression");
+        x3::any_rule<std::string::const_iterator, ast::program, subcontext_type> term("term");
+        x3::any_rule<std::string::const_iterator, ast::operand, subcontext_type> factor("factor");
 
         auto const expression_def =
             term
@@ -218,7 +227,7 @@ namespace client
             ;
         
         
-        x3::any_rule<std::string::const_iterator, ast::program, boost::spirit::x3::ascii::space_type> calculator(
+        x3::any_rule<std::string::const_iterator, ast::program, subcontext_type> calculator(
             ( 
                 expression = expression_def
               , term = term_def
