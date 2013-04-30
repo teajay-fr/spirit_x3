@@ -17,6 +17,7 @@
 #include <boost/spirit/home/x3/core/skip_over.hpp>
 #include <boost/spirit/home/x3/core/parser.hpp>
 #include <boost/type_traits/remove_reference.hpp>
+#include <boost/utility/enable_if.hpp>
 
 namespace boost { namespace spirit { namespace x3
 {
@@ -34,11 +35,12 @@ namespace boost { namespace spirit { namespace x3
         attribute_type;
 
         template <typename Iterator, typename Context, typename Attribute>
-        bool parse(Iterator& first, Iterator const& last
+        typename enable_if<has_skipper<Context>, bool>::type
+        parse(Iterator& first, Iterator const& last
           , Context const& context, Attribute& attr) const
         {
             x3::skip_over(first, last, context);
-            auto skipper = get<skipper_tag>(context);
+            auto const& skipper = get<skipper_tag>(context);
 
             typedef unused_skipper<
                 typename remove_reference<decltype(skipper)>::type>
@@ -48,6 +50,19 @@ namespace boost { namespace spirit { namespace x3
             return this->subject.parse(
                 first, last
               , make_context<skipper_tag>(unused_skipper, context)
+              , attr);
+        }
+        template <typename Iterator, typename Context, typename Attribute>
+        typename disable_if<has_skipper<Context>, bool>::type
+        parse(Iterator& first, Iterator const& last
+          , Context const& context, Attribute& attr) const
+        {
+            //  no need to pre-skip if skipper is unused
+            //- x3::skip_over(first, last, context);
+
+            return this->subject.parse(
+                first, last
+              , context
               , attr);
         }
     };
@@ -68,7 +83,5 @@ namespace boost { namespace spirit { namespace x3
 
     lexeme_gen const lexeme = lexeme_gen();
 }}}
-
-
 
 #endif
