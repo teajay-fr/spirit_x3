@@ -16,7 +16,6 @@
 #include <boost/assert.hpp>
 #include <boost/spirit/home/x3/core/parser.hpp>
 #include <boost/spirit/home/support/context.hpp>
-#include <boost/spirit/home/support/context_map.hpp>
 #include <boost/spirit/home/support/unused.hpp>
 #include <boost/spirit/home/support/traits/container_traits.hpp>
 #include <boost/static_assert.hpp>
@@ -35,14 +34,14 @@ namespace boost { namespace spirit { namespace x3 {
     template<
         typename Iterator
       , typename Attribute = unused_type
-      , typename ContextMap = context_map<>
+      , typename Context = unused_type
     >
     struct any_rule;
 
-    template<typename Iterator, typename Attribute, typename ContextMap>
-    struct any_rule_parser : parser<any_rule_parser<Iterator, Attribute, ContextMap>>
+    template<typename Iterator, typename Attribute, typename Context>
+    struct any_rule_parser : parser<any_rule_parser<Iterator, Attribute, Context>>
     {
-        typedef any_rule<Iterator, Attribute, ContextMap> rule_type;
+        typedef any_rule<Iterator, Attribute, Context> rule_type;
         
         typedef Attribute attribute_type;
 
@@ -54,9 +53,9 @@ namespace boost { namespace spirit { namespace x3 {
         explicit any_rule_parser(rule_type const* rule_ptr)
           : _ptr(rule_ptr) {}
 
-        template <typename Iterator_, typename Context, typename Attribute_>
+        template <typename Iterator_, typename Context_, typename Attribute_>
         bool parse(Iterator_& first, Iterator_ const& last
-          , Context const& context, Attribute_& attr) const
+          , Context_ const& context, Attribute_& attr) const
         {
             return _ptr->parse(first, last, context, attr);
         }
@@ -71,14 +70,14 @@ namespace boost { namespace spirit { namespace x3 {
 
     struct any_rule_base {};
 
-    template <typename Iterator, typename Attribute, typename ContextMap>
+    template <typename Iterator, typename Attribute, typename Context>
     struct any_rule : any_rule_base
     {
         typedef Iterator iterator_type;
         typedef Attribute attribute_type;
-        typedef ContextMap context_type;
+        typedef Context context_type;
 
-        typedef any_rule_parser<Iterator, Attribute, ContextMap> parser_type;
+        typedef any_rule_parser<Iterator, Attribute, Context> parser_type;
         
 #if !defined(BOOST_SPIRIT_NO_RTTI)
         any_rule(char const* name = typeid(any_rule).name())
@@ -113,9 +112,9 @@ namespace boost { namespace spirit { namespace x3 {
             return *this;
         }
 
-        template<typename Iterator_, typename Context>
+        template<typename Iterator_, typename Context_>
         bool parse(Iterator_& first, Iterator_ const& last
-          , Context const& context, attribute_type& attr) const
+          , Context_ const& context, attribute_type& attr) const
         {
             BOOST_STATIC_ASSERT_MSG(
                 (is_same<iterator_type, Iterator_>::value)
@@ -128,9 +127,9 @@ namespace boost { namespace spirit { namespace x3 {
             );
             return _content->parse(first, last, context, attr);
         }
-        template<typename Iterator_, typename Context, typename Attribute_>
+        template<typename Iterator_, typename Context_, typename Attribute_>
         bool parse(Iterator_& first, Iterator_ const& last
-          , Context const& context, Attribute_& attr_) const
+          , Context_ const& context, Attribute_& attr_) const
         {
             Attribute attr;
             if(parse(first, last, context, attr))
@@ -201,12 +200,12 @@ namespace boost { namespace spirit { namespace x3 {
         any_rule(any_rule const&);
     };
     
-    template <typename Iterator, typename Attribute, typename ContextMap>
-    struct get_info<any_rule< Iterator, Attribute, ContextMap>>
+    template <typename Iterator, typename Attribute, typename Context>
+    struct get_info<any_rule< Iterator, Attribute, Context>>
     {
         typedef std::string result_type;
         std::string operator()(
-            any_rule<Iterator, Attribute, ContextMap> const& parser ) const
+            any_rule<Iterator, Attribute, Context> const& parser ) const
         {
             return parser.get_info();
         }

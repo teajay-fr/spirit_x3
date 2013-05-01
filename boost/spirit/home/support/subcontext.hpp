@@ -7,8 +7,8 @@
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 =============================================================================*/
 
-#ifndef BOOST_SPIRIT_CONTEXT_MAP_HPP
-#define BOOST_SPIRIT_CONTEXT_MAP_HPP
+#ifndef BOOST_SPIRIT_SUBCONTEXT_HPP
+#define BOOST_SPIRIT_SUBCONTEXT_HPP
 
 #if defined(_MSC_VER)
 #pragma once
@@ -20,18 +20,18 @@
 namespace boost { namespace spirit {
 
     template <typename... T>
-    struct context_map;
+    struct subcontext;
 
     template <>
-    struct context_map<>
+    struct subcontext<>
     {
         template <typename Context>
-        context_map(Context const& /*context*/)
+        subcontext(Context const& /*context*/)
         {}
     };
 
     template <typename T>
-    struct context_map<T>
+    struct subcontext<T>
       : boost::spirit::context<
             typename T::first_type, typename T::second_type
         >
@@ -41,27 +41,27 @@ namespace boost { namespace spirit {
             > context_type;
 
         template <typename Context>
-        context_map(Context const& context)
+        subcontext(Context const& context)
           : context_type(boost::spirit::get<typename T::first_type>(context))
         {}
     };
 
     template <typename T, typename... Tail>
-    struct context_map<T, Tail...>
-      : context_map<Tail...>
+    struct subcontext<T, Tail...>
+      : subcontext<Tail...>
       , boost::spirit::context<
             typename T::first_type, typename T::second_type
-          , context_map<Tail...>
+          , subcontext<Tail...>
         >
     {
-        typedef context_map<Tail...> base_type;
+        typedef subcontext<Tail...> base_type;
         typedef boost::spirit::context<
                 typename T::first_type, typename T::second_type
               , base_type
             > context_type;
 
         template <typename Context>
-        context_map(Context const& context)
+        subcontext(Context const& context)
           : base_type(context)
           , context_type(
                 boost::spirit::get<typename T::first_type>(context)
@@ -73,4 +73,4 @@ namespace boost { namespace spirit {
 
 } } // namespace boost::spirit
 
-#endif /*BOOST_SPIRIT_CONTEXT_MAP_HPP*/
+#endif /*BOOST_SPIRIT_SUBCONTEXT_HPP*/

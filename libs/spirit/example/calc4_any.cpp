@@ -23,6 +23,7 @@
 
 #include <boost/config/warning_disable.hpp>
 #include <boost/spirit/home/x3.hpp>
+#include <boost/spirit/home/support/subcontext.hpp>
 #include <boost/variant/recursive_variant.hpp>
 #include <boost/variant/apply_visitor.hpp>
 #include <boost/fusion/include/adapt_struct.hpp>
@@ -193,7 +194,7 @@ namespace client
         using x3::char_;
 
         typedef
-            boost::spirit::context_map<
+            boost::spirit::subcontext<
                 boost::fusion::pair<
                     boost::spirit::x3::skipper_tag
                   , boost::spirit::x3::ascii::space_type const
