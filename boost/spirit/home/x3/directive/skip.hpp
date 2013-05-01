@@ -50,6 +50,10 @@ namespace boost { namespace spirit { namespace x3
         typedef typename
             traits::attribute_of<Subject>::type
         attribute_type;
+        static bool const has_attribute =
+            !is_same<attribute_type, unused_type>::value;
+        static bool const handles_container =
+            Subject::handles_container;
 
         template <typename Iterator, typename Context, typename Attribute>
         typename disable_if<has_skipper<Context>, bool>::type
