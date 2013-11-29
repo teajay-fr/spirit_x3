@@ -15,6 +15,7 @@
 #include <boost/spirit/home/x3/core/skip_over.hpp>
 #include <boost/spirit/home/x3/string/detail/string_parse.hpp>
 #include <boost/spirit/home/x3/support/utility/utf8.hpp>
+#include <boost/spirit/home/x3/string/keyword.hpp>
 #include <boost/spirit/home/support/char_encoding/ascii.hpp>
 #include <boost/spirit/home/support/char_encoding/standard.hpp>
 #include <boost/spirit/home/support/char_encoding/standard_wide.hpp>
@@ -23,12 +24,15 @@
 #include <boost/type_traits/add_reference.hpp>
 #include <string>
 
+
 namespace boost { namespace spirit { namespace x3
 {
     template <typename String, typename Encoding,
         typename Attribute = std::basic_string<typename Encoding::char_type>>
     struct literal_string : parser<literal_string<String, Encoding, Attribute>>
     {
+        typedef literal_string< String, Encoding, Attribute> this_type;
+
         typedef typename Encoding::char_type char_type;
         typedef Encoding encoding;
         typedef Attribute attribute_type;
@@ -48,6 +52,21 @@ namespace boost { namespace spirit { namespace x3
             return detail::string_parse(str, first, last, attr);
         }
 
+
+
+        template <typename Subject>
+        keyword_parser< this_type
+                        , typename extension::as_parser<Subject>::value_type >
+            operator->*(Subject const& subject) const
+        {
+          typedef
+              keyword_parser< this_type
+                            , typename extension::as_parser<Subject>::value_type >
+          result_type;
+
+          return result_type(*this,as_parser(subject));
+
+        }
         String str;
     };
 
