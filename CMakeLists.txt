@@ -1,0 +1,10 @@
+# Make sure the CMake version is at least 2.8
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+PROJECT(Spirit_X3 CXX C)
+SET(BOOST_ROOT "/home/be/Workspace/boost_1_55_0")
+FIND_PACKAGE(Boost 1.53)
+ADD_DEFINITIONS(-std=c++11)
+INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR} ${CMAKE_SOURCE_DIR})
+ADD_SUBDIRECTORY(boost)
+ADD_EXECUTABLE(symbols1 libs/spirit/test/x3/symbols1.cpp)
+ADD_EXECUTABLE(keywords libs/spirit/test/x3/keywords.cpp)
