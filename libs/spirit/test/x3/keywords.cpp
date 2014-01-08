@@ -47,7 +47,7 @@ main()
 {
     using spirit_test::test_attr;
     using spirit_test::test;
-    using namespace boost::spirit;    
+    using namespace boost::spirit;
     using namespace boost::spirit::x3::ascii;
     //using boost::spirit::repository::kwd;
     //using boost::spirit::repository::ikwd;
@@ -57,13 +57,12 @@ main()
     using boost::spirit::x3::int_;
     using boost::spirit::x3::lit;
     using boost::spirit::x3::lexeme;
-    using boost::spirit::x3::kwd;
+    //using boost::spirit::x3::kwd;
 
 
     {
-
         int data;
-        BOOST_TEST( test_attr("c=1", kwd("c")['=' > int_] ,data, space ));
+        BOOST_TEST( test_attr("c=1", lit("c")->*('=' > int_) / lit("b")->*('='>int_) / lit("d")->*('='>int_) ,data, space ));
         // no constraints
         //boost::fusion::vector<char,char,int> data;
         //BOOST_TEST( test_attr("c=1 a=a", kwd("a")[ '=' > char_] / kwd("b")[ '=' > char_] / kwd("c")['=' > int_], data, space));

@@ -22,5 +22,5 @@
 #include <boost/spirit/home/x3/operator/plus.hpp>
 #include <boost/spirit/home/x3/operator/and_predicate.hpp>
 #include <boost/spirit/home/x3/operator/not_predicate.hpp>
-
+#include <boost/spirit/home/x3/operator/keyword.hpp>
 #endif

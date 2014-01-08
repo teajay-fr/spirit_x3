@@ -16,7 +16,7 @@
 #include <boost/type_traits/is_base_of.hpp>
 #include <boost/type_traits/remove_cv.hpp>
 #include <boost/type_traits/remove_reference.hpp>
-#include <boost/utility/declval.hpp> 
+#include <boost/utility/declval.hpp>
 #include <boost/utility/enable_if.hpp>
 #include <boost/spirit/home/x3/support/unused.hpp>
 #include <boost/spirit/home/x3/support/context.hpp>
@@ -55,7 +55,10 @@ namespace boost { namespace spirit { namespace x3
         {
             return *static_cast<Derived const*>(this);
         }
-
+        Derived const* derived_ptr() const
+        {
+            return static_cast<Derived const*>(this);
+        }
         template <typename Action>
         action<Derived, Action>
         operator[](Action f) const
@@ -189,9 +192,9 @@ namespace boost { namespace spirit { namespace x3
     {
         return p.derived();
     }
-    
+
     ///////////////////////////////////////////////////////////////////////////
-    // is_parser<T>: metafunction that evaluates to mpl::true_ if a type T 
+    // is_parser<T>: metafunction that evaluates to mpl::true_ if a type T
     // can be used as a parser, mpl::false_ otherwise
     ///////////////////////////////////////////////////////////////////////////
     template <typename T, typename Enable = void>
@@ -240,7 +243,7 @@ namespace boost { namespace spirit { namespace x3 { namespace traits
     template <typename Subject, typename Derived, typename Context>
     struct has_attribute<x3::unary_parser<Subject, Derived>, Context>
         : has_attribute<Subject, Context> {};
-    
+
     template <typename Left, typename Right, typename Derived, typename Context>
     struct has_attribute<x3::binary_parser<Left, Right, Derived>, Context>
         : mpl::bool_<has_attribute<Left, Context>::value ||

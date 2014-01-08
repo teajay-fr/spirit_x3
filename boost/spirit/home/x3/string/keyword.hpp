@@ -31,8 +31,8 @@ namespace boost { namespace spirit { namespace x3
 template <typename Left, typename Right>
 struct keyword_parser : binary_parser<Left,Right, keyword_parser<Left,Right>>
 {
-    typedef binary_parser<Left,Right, keyword_parser<Left,Right> > base_type;
-    static const bool has_attribute = Right::has_attribute;
+    typedef binary_parser<Left, Right, keyword_parser<Left,Right> > base_type;
+    static const bool has_attribute = true;
 
     keyword_parser(Left const& left, Right const& right)
       : base_type(left,right) {}
@@ -60,8 +60,8 @@ struct kwd_gen
     }
 
     template <typename Subject2>
-    keyword_parser<typename extension::as_parser<Subject1>::value_type
-                     ,typename extension::as_parser<Subject2>::value_type>
+    keyword_parser< typename extension::as_parser<Subject1>::value_type
+                    ,typename extension::as_parser<Subject2>::value_type >
     operator()(Subject2 const& subject) const
     {
         typedef
