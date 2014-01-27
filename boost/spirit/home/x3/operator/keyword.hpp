@@ -29,7 +29,7 @@ namespace boost { namespace spirit { namespace x3
             : base_type(left, right) {
 
         }
-
+#if 0
         template <typename Iterator, typename Context, typename Attribute>
         bool parse(
             Iterator& first, Iterator const& last
@@ -44,35 +44,35 @@ namespace boost { namespace spirit { namespace x3
     {
         typedef binary_parser<Left, Right, parsing_keyword< Left, Right>> base_type;
 
-        typedef typename detail::keyword_parser_variant<Left,Right>::type parser_types;
-
-        typedef tst<char, parser_types> Lookup;
-        shared_ptr<Lookup> lookup;
 
         parsing_keyword(Left left, Right right)
             : base_type(left, right)
-            , lookup(new Lookup())
         {
 
         }
-
+#endif
         template <typename Iterator, typename Context, typename Attribute>
         bool parse(
             Iterator& first, Iterator const& last
           , Context const& context, Attribute& attr) const
         {
-            if(lookup->empty())
-            {
-                detail::add_keyword(lookup,this->left);
-                detail::add_keyword(lookup,this->right);
-            }
-            parser_types subject;
-            x3::skip_over(first, last, context);
-            if(parser_types *subparser =
-                    lookup->find(first,last,tst_pass_through()))
-            {
 
-                //return subject.parse(first,last,context,attr);
+          typedef detail::get_kwd_parser_types<Left, Right, Context, Attribute> parser_types;
+          typedef typename make_variant_over<typename parser_types::type>::type parser_variant;
+          typedef tst<char, parser_variant> Lookup;
+          static Lookup lookup;
+          if(lookup.empty())
+            {
+              parser_types::add_keyword(lookup,*this);
+            }
+
+//          parser_types subject;
+            x3::skip_over(first, last, context);
+            if(parser_variant *subparser =
+                    lookup.find(first,last,tst_pass_through()))
+            {
+                return boost::apply_visitor(
+                      detail::keyword_parse_visitor<Iterator,Context,Attribute>(first,last,context,attr),*subparser);
             }
 
             return false;

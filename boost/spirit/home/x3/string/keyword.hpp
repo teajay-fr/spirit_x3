@@ -33,7 +33,7 @@ struct keyword_parser : binary_parser<Left,Right, keyword_parser<Left,Right>>
 {
     typedef binary_parser<Left, Right, keyword_parser<Left,Right> > base_type;
     static const bool has_attribute = true;
-
+    static const bool is_keyword = true;
     keyword_parser(Left const& left, Right const& right)
       : base_type(left,right) {}
 

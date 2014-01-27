@@ -61,8 +61,10 @@ main()
 
 
     {
-        int data;
-        BOOST_TEST( test_attr("c=1", lit("c")->*('=' > int_) / lit("b")->*('='>int_) / lit("d")->*('='>int_) ,data, space ));
+        //boost::fusion::vector<int,int,int> data;
+        //BOOST_TEST( test_attr("c=1", lit("c")->*('=' > int_) / lit("b")->*('='>int_) / lit("d")->*('='>int_) ,data, space ));
+        boost::fusion::vector<int,int> data;
+        BOOST_TEST( test_attr("c=1", lit("c")->*('=' > int_) / lit("b")->*('='>int_), data, space ));
         // no constraints
         //boost::fusion::vector<char,char,int> data;
         //BOOST_TEST( test_attr("c=1 a=a", kwd("a")[ '=' > char_] / kwd("b")[ '=' > char_] / kwd("c")['=' > int_], data, space));
