@@ -13,6 +13,7 @@
 #include <boost/fusion/container/vector.hpp>
 #include <string>
 #include <iostream>
+#include <boost/fusion/sequence/io.hpp>
 #include "test.hpp"
 #if 0
 struct x_attr
@@ -60,11 +61,14 @@ main()
     //using boost::spirit::x3::kwd;
 
 
-    {
-        //boost::fusion::vector<int,int,int> data;
-        //BOOST_TEST( test_attr("c=1", lit("c")->*('=' > int_) / lit("b")->*('='>int_) / lit("d")->*('='>int_) ,data, space ));
+  {
         boost::fusion::vector<int,int> data;
-        BOOST_TEST( test_attr("c=1", lit("c")->*('=' > int_) / lit("b")->*('='>int_), data, space ));
+        BOOST_TEST( test_attr("b=1", lit("c")->*('=' > int_) / lit("b")->*('='>int_), data, space ));
+   }
+  {
+        boost::fusion::vector<int,int,int> data;
+        BOOST_TEST( test_attr("c=1", lit("c")->*('=' > int_) / lit("b")->*('='>int_) / lit("d")->*('='>int_) ,data, space ));
+        std::cout<<data<<std::endl;
         // no constraints
         //boost::fusion::vector<char,char,int> data;
         //BOOST_TEST( test_attr("c=1 a=a", kwd("a")[ '=' > char_] / kwd("b")[ '=' > char_] / kwd("c")['=' > int_], data, space));

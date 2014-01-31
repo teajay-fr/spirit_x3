@@ -28,6 +28,7 @@
 #include <boost/fusion/include/iterator_range.hpp>
 #include <boost/fusion/include/as_deque.hpp>
 #include <boost/fusion/include/mpl.hpp>
+#include <boost/fusion/include/advance.hpp>
 
 #include <boost/mpl/copy_if.hpp>
 #include <boost/mpl/not.hpp>
@@ -135,6 +136,16 @@ namespace boost { namespace spirit { namespace x3 { namespace detail
       , typename enable_if_c<(Parser::Right::is_pass_through_unary)>::type>
       : pass_keyword_attribute_subject<typename Parser::Right, Attribute> {};
 
+    template <typename Attribute, int Start, int End, typename ResultType>
+    struct get_attribute
+    {
+      static ResultType call(Attribute &s)
+      {
+        auto i = fusion::begin(s);
+        return ResultType(fusion::advance_c<Start>(i),fusion::advance_c<End>(i));
+      }
+    };
+
     template <typename L, typename R, typename Attribute, typename Context
       , typename Enable = void>
     struct partition_keyword_attribute
@@ -157,6 +168,8 @@ namespace boost { namespace spirit { namespace x3 { namespace detail
         typedef fusion::iterator_range<l_end, r_end> r_part;
         typedef pass_keyword_attribute<L, l_part> l_pass;
         typedef pass_keyword_attribute<R, r_part> r_pass;
+        typedef get_attribute<Attribute, 0, l_size, l_part> l_get_attr;
+        typedef get_attribute<Attribute, l_size, l_size+r_size, r_part> r_get_attr;
 
         static l_part left(Attribute& s)
         {
@@ -255,8 +268,8 @@ namespace boost { namespace spirit { namespace x3 { namespace detail
         typedef partition_keyword_attribute< L, R, Attribute, Context> l_partition;
         typedef
             mpl::vector<
-                  keyword_parser_holder<typename L::right_type, typename l_partition::l_pass>
-                , keyword_parser_holder<typename R::right_type, typename l_partition::r_pass> >
+                  keyword_parser_holder<typename L::right_type, typename l_partition::l_get_attr>
+                , keyword_parser_holder<typename R::right_type, typename l_partition::r_get_attr> >
                 type;
 
             template <typename Keywords>
@@ -264,11 +277,11 @@ namespace boost { namespace spirit { namespace x3 { namespace detail
             {
               keywords.add(traits::get_string_begin<char>(parser.left.left.str)
                            ,traits::get_string_end<char>(parser.left.left.str)
-                           ,keyword_parser_holder<typename L::right_type,typename l_partition::l_pass>(parser.left.right.derived_ptr()));
+                           ,keyword_parser_holder<typename L::right_type,typename l_partition::l_get_attr>(parser.left.right.derived_ptr()));
 
               keywords.add(traits::get_string_begin<char>(parser.right.left.str)
                            ,traits::get_string_end<char>(parser.right.left.str)
-                           ,keyword_parser_holder<typename R::right_type,typename l_partition::r_pass>(parser.right.right.derived_ptr()));
+                           ,keyword_parser_holder<typename R::right_type,typename l_partition::r_get_attr>(parser.right.right.derived_ptr()));
             }
   /*       template <typename Keywords>
          static void add_keyword(Keywords &keywords, const R& parser)
@@ -428,7 +441,7 @@ namespace boost { namespace spirit { namespace x3 { namespace detail
                // typedef traits::make_attribute<attr_type, Attribute> make_attribute;
 
                 typedef typename Parser::partition_attribute partition_attribute;
-                typedef typename partition_attribute::debug debug;
+//                typedef typename partition_attribute::debug debug;
                 auto current_attr = partition_attribute::call(attr);
 
                 Iterator save = first;
