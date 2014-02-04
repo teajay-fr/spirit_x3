@@ -23,8 +23,10 @@ namespace boost { namespace spirit { namespace x3
     template <typename Left, typename Right>
     struct keyword : binary_parser< Left, Right, keyword<Left , Right>>
     {
+      //typedef typename Left::sa asd;
         typedef binary_parser<Left, Right, keyword< Left, Right>> base_type;
 
+        static const bool is_keyword = false;
         keyword(Left left, Right right)
             : base_type(left, right) {
 
@@ -35,16 +37,19 @@ namespace boost { namespace spirit { namespace x3
             Iterator& first, Iterator const& last
           , Context const& context, Attribute& attr) const
         {
-            return false;
+//          typedef typename Left::dd dd;
+            return this->left.parse(first,last,context,attr);
+//            return false;
         }
-    };
 
+    };
     template <typename Left, typename Right>
     struct parsing_keyword : binary_parser< Left, Right, parsing_keyword<Left , Right>>
     {
         typedef binary_parser<Left, Right, parsing_keyword< Left, Right>> base_type;
 
 
+        static const bool is_keyword = false;
         parsing_keyword(Left left, Right right)
             : base_type(left, right)
         {
@@ -57,10 +62,10 @@ namespace boost { namespace spirit { namespace x3
           , Context const& context, Attribute& attr) const
         {
 
-          typedef detail::get_kwd_parser_types<Left, Right, Context, Attribute> parser_types;
-//          typedef typename make_variant_over<typename parser_types::type>::type parser_variant;
-//          typedef tst<char, parser_variant> Lookup;
-          /*static Lookup lookup;
+          typedef detail::get_kwd_parser_types<Left, Right, Context, Attribute,0> parser_types;
+          typedef typename make_variant_over<typename parser_types::type>::type parser_variant;
+          typedef tst<char, parser_variant> Lookup;
+          static Lookup lookup;
           if(lookup.empty())
             {
               parser_types::add_keyword(lookup,*this);
@@ -74,27 +79,27 @@ namespace boost { namespace spirit { namespace x3
                 return boost::apply_visitor(
                       detail::keyword_parse_visitor<Iterator,Context,Attribute>(first,last,context,attr),*subparser);
             }
-*/
             return false;
         }
     };
 
     template <typename Left, typename Right>
-    inline parsing_keyword<
+    inline keyword<
         typename extension::as_parser<Left>::value_type
       , typename extension::as_parser<Right>::value_type>
     operator/(Left const& left, Right const& right)
     {
         return {as_parser(left), as_parser(right)};
     }
-    template <typename LeftKey, typename LeftSubject, typename Right>
-    inline keyword<
+/*    template <typename LeftKey, typename LeftSubject, typename RightKey, typename RightSubject>
+    inline parsing_keyword<
           typename extension::as_parser< keyword_parser<LeftKey,LeftSubject> >::value_type
-        , typename extension::as_parser< Right>::value_type>
-    operator/(keyword_parser<LeftKey,LeftSubject> const &left, Right const &right)
+        , typename extension::as_parser< keyword_parser<RightKey,RightSubject> >::value_type>
+    operator/(keyword_parser<LeftKey, LeftSubject> const &left, keyword_parser<RightKey, RightSubject> const &right)
     {
+
        return {as_parser(left),as_parser(right)};
-    }
+    }*/
 }}}
 
 namespace boost { namespace spirit { namespace x3 { namespace traits

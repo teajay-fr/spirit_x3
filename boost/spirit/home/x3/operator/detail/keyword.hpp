@@ -146,7 +146,7 @@ namespace boost { namespace spirit { namespace x3 { namespace detail
       }
     };
 
-    template <typename L, typename R, typename Attribute, typename Context
+    template <typename L, typename R, typename Attribute, typename Context, int Offset
       , typename Enable = void>
     struct partition_keyword_attribute
     {
@@ -157,19 +157,20 @@ namespace boost { namespace spirit { namespace x3 { namespace detail
         // a fusion sequence with the wrong number of elements
         // as that expected by the (sequence) parser.
         static_assert(
-            fusion::result_of::size<Attribute>::value == (l_size + r_size)
+            fusion::result_of::size<Attribute>::value - Offset == (l_size + r_size )
           , "Attribute does not have the expected size."
         );
 
         typedef typename fusion::result_of::begin<Attribute>::type l_begin;
-        typedef typename fusion::result_of::advance_c<l_begin, l_size>::type l_end;
-        typedef typename fusion::result_of::end<Attribute>::type r_end;
-        typedef fusion::iterator_range<l_begin, l_end> l_part;
+        typedef typename fusion::result_of::advance_c<l_begin, Offset>::type l_start;
+        typedef typename fusion::result_of::advance_c<l_start, l_size>::type l_end;
+        typedef typename fusion::result_of::advance_c<l_start, r_size>::type r_end;
+        typedef fusion::iterator_range<l_start, l_end> l_part;
         typedef fusion::iterator_range<l_end, r_end> r_part;
         typedef pass_keyword_attribute<L, l_part> l_pass;
         typedef pass_keyword_attribute<R, r_part> r_pass;
-        typedef get_attribute<Attribute, 0, l_size, l_part> l_get_attr;
-        typedef get_attribute<Attribute, l_size, l_size+r_size, r_part> r_get_attr;
+        typedef get_attribute<Attribute, Offset, l_size, l_part> l_get_attr;
+        typedef get_attribute<Attribute, l_size+Offset, l_size+r_size+Offset, r_part> r_get_attr;
 
         static l_part left(Attribute& s)
         {
@@ -185,11 +186,12 @@ namespace boost { namespace spirit { namespace x3 { namespace detail
         }
     };
 
-    template <typename L, typename R, typename Attribute, typename Context>
-    struct partition_keyword_attribute<L, R, Attribute, Context,
+    template <typename L, typename R, typename Attribute, typename Context, int Offset>
+    struct partition_keyword_attribute<L, R, Attribute, Context, Offset,
         typename enable_if_c<(!traits::has_attribute<typename L::Right, Context>::value &&
             traits::has_attribute<typename R::Right, Context>::value)>::type>
     {
+        static int const l_size = Offset;
         typedef unused_type l_part;
         typedef Attribute& r_part;
         typedef pass_keyword_attribute_unused l_pass;
@@ -206,11 +208,13 @@ namespace boost { namespace spirit { namespace x3 { namespace detail
         }
     };
 
-    template <typename L, typename R, typename Attribute, typename Context>
-    struct partition_keyword_attribute<L, R, Attribute, Context,
+    template <typename L, typename R, typename Attribute, typename Context, int Offset>
+    struct partition_keyword_attribute<L, R, Attribute, Context, Offset,
         typename enable_if_c<(traits::has_attribute<typename L::Right, Context>::value &&
             !traits::has_attribute<typename R::Right, Context>::value)>::type>
     {
+
+        static int const l_size = Offset;
         typedef Attribute& l_part;
         typedef unused_type r_part;
         typedef pass_keyword_attribute<typename L::right_type, Attribute> l_pass;
@@ -227,11 +231,12 @@ namespace boost { namespace spirit { namespace x3 { namespace detail
         }
     };
 
-    template <typename L, typename R, typename Attribute, typename Context>
-    struct partition_keyword_attribute<L, R, Attribute, Context,
+    template <typename L, typename R, typename Attribute, typename Context, int Offset>
+    struct partition_keyword_attribute<L, R, Attribute, Context, Offset,
         typename enable_if_c<(!traits::has_attribute<typename L::Right, Context>::value &&
             !traits::has_attribute<typename R::Right, Context>::value)>::type>
     {
+        static int const l_size = Offset;
         typedef unused_type l_part;
         typedef unused_type r_part;
         typedef pass_keyword_attribute_unused l_pass;
@@ -258,20 +263,33 @@ namespace boost { namespace spirit { namespace x3 { namespace detail
        {
 
        }
+//       typedef typename partition_attribute::debug debug;
+//       typedef typename Subject::d2 de2;
        const Subject *parser;
 //       Partition partition_attribute;
     };
 
-    template <typename L, typename R, typename Context, typename Attribute, typename Enable = void>
+    template <typename L, typename R, typename Context, typename Attribute, int Offset, typename Enable = void>
     struct get_kwd_parser_types
     {
-        typedef partition_keyword_attribute< L, R, Attribute, Context> l_partition;
+        typedef partition_keyword_attribute< L, R, Attribute, Context, Offset> l_partition;
         typedef
             mpl::vector<
                   keyword_parser_holder<typename L::right_type, typename l_partition::l_get_attr>
                 , keyword_parser_holder<typename R::right_type, typename l_partition::r_get_attr> >
                 type;
 
+            template <typename Keywords>
+            static void add_keyword(Keywords &keywords, const parsing_keyword<L,R> & parser)
+            {
+              keywords.add(traits::get_string_begin<char>(parser.left.left.str)
+                           ,traits::get_string_end<char>(parser.left.left.str)
+                           ,keyword_parser_holder<typename L::right_type,typename l_partition::l_get_attr>(parser.left.right.derived_ptr()));
+
+              keywords.add(traits::get_string_begin<char>(parser.right.left.str)
+                           ,traits::get_string_end<char>(parser.right.left.str)
+                           ,keyword_parser_holder<typename R::right_type,typename l_partition::r_get_attr>(parser.right.right.derived_ptr()));
+            }
             template <typename Keywords>
             static void add_keyword(Keywords &keywords, const keyword<L,R> & parser)
             {
@@ -293,21 +311,29 @@ namespace boost { namespace spirit { namespace x3 { namespace detail
            }*/
     };
 
-    template <typename L, typename R, typename Attribute, typename Context >
-    struct get_kwd_parser_types<L, R, Attribute, Context, typename enable_if_c< !R::is_keyword && L::is_keyword >::type >
+    template <typename L, typename R, typename Attribute, typename Context, int Offset >
+    struct get_kwd_parser_types<L, R, Attribute, Context, Offset, typename enable_if_c< !R::is_keyword && L::is_keyword >::type >
     {
         typedef typename L::debug debug;
-        typedef partition_keyword_attribute< L, R, Attribute, Context> partition;
+        typedef partition_keyword_attribute< L, R, Attribute, Context, Offset> partition;
 
-        typedef typename get_kwd_parser_types<typename L::left_type, typename L::right_type, Attribute, Context>::type left_types;
+        typedef typename get_kwd_parser_types<typename L::left_type, typename L::right_type, Attribute, Context, Offset>::type left_types;
         typedef typename
             mpl::push_back<
                 left_types
               , keyword_parser_holder<R, partition>
             >::type
         type;
-             template <typename Keywords>
+            template <typename Keywords>
             static void add_keyword(Keywords &keywords, const keyword<L, R> &parser)
+            {
+              left_types::add_keyword(keywords,parser.right);
+              keywords.add(traits::get_string_begin<char>(parser.left.left)
+                           ,traits::get_string_end<char>(parser.left.left)
+                           ,keyword_parser_holder<L,partition>(parser.left.right));
+            }
+            template <typename Keywords>
+            static void add_keyword(Keywords &keywords, const parsing_keyword<L, R> &parser)
             {
               left_types::add_keyword(keywords,parser.right);
               keywords.add(traits::get_string_begin<char>(parser.left.left)
@@ -316,34 +342,51 @@ namespace boost { namespace spirit { namespace x3 { namespace detail
             }
     };
 
-    template <typename L, typename R, typename Context, typename Attribute>
-    struct get_kwd_parser_types<L, R, Context, Attribute, typename enable_if_c< R::is_keyword && !L::is_keyword>::type >
+    template <typename L, typename R, typename Context, typename Attribute, int Offset>
+    struct get_kwd_parser_types<L, R, Context, Attribute, Offset, typename enable_if_c< R::is_keyword && !L::is_keyword>::type >
     {
-        typedef typename L::debug1 debug;
-        typedef partition_keyword_attribute< L, R, Attribute, Context> partition;
-        typedef typename get_kwd_parser_types<typename R::left_type, typename R::right_type, Context, Attribute>::type right_types;
+    //    typedef typename L::dfasd dfd;
+    //    typedef typename R::saf sa;
+        typedef partition_keyword_attribute< L, R, Attribute, Context, Offset> partition;
+        typedef typename partition::l_part l_part_attribute;
+        typedef get_kwd_parser_types<
+                                  typename L::left_type
+                                , typename L::right_type
+                                , Context
+                                , Attribute, Offset + partition::r_size > left_get_kwd_parser;
+      typedef keyword_parser_holder< typename R::right_type, typename partition::r_get_attr> holder_type;
         typedef typename
             mpl::push_front<
-                right_types
-              , keyword_parser_holder<L, partition>
-            >::type
-        type;
+                typename left_get_kwd_parser::type
+              , holder_type
+            >::type type;
+
             template <typename Keywords>
             static void add_keyword(Keywords &keywords, const keyword<L, R> &parser)
             {
-              right_types::add_keyword(keywords,parser.left);
-              keywords.add(traits::get_string_begin<char>(parser.right.left)
-                           ,traits::get_string_end<char>(parser.right.left)
-                           ,keyword_parser_holder<L,partition>(parser.right.right));
+              left_get_kwd_parser::add_keyword(keywords,parser.left);
+              keywords.add(traits::get_string_begin<char>(parser.right.left.str)
+                           ,traits::get_string_end<char>(parser.right.left.str)
+                           ,holder_type(parser.right.right.derived_ptr()));
             }
+            template <typename Keywords>
+            static void add_keyword(Keywords &keywords, const parsing_keyword<L, R> &parser)
+            {
+              left_get_kwd_parser::add_keyword(keywords,parser.left);
+              keywords.add(traits::get_string_begin<char>(parser.right.left.str)
+                           ,traits::get_string_end<char>(parser.right.left.str)
+                           ,holder_type(parser.right.right.derived_ptr()));
+            }
+
+
     };
 
-    template <typename L, typename R, typename Context, typename Attribute>
-    struct get_kwd_parser_types< L, R, Context, Attribute, typename enable_if_c< !R::is_keyword && !L::is_keyword >::type >
+    template <typename L, typename R, typename Context, typename Attribute, int Offset>
+    struct get_kwd_parser_types< L, R, Context, Attribute, Offset, typename enable_if_c< !R::is_keyword && !L::is_keyword >::type >
     {
         typedef typename L::debug2 debug;
-        typedef typename get_kwd_parser_types<typename L::left_type, typename L::right_type, Context, Attribute>::type left_types;
-        typedef typename get_kwd_parser_types<typename R::left_type, typename R::right_type, Context, Attribute>::type right_types;
+        typedef typename get_kwd_parser_types<typename L::left_type, typename L::right_type, Context, Attribute, Offset>::type left_types;
+        typedef typename get_kwd_parser_types<typename R::left_type, typename R::right_type, Context, Attribute, Offset>::type right_types;
         typedef
             mpl::joint_view<
                 left_types
@@ -369,7 +412,7 @@ namespace boost { namespace spirit { namespace x3 { namespace detail
     struct keyword_parser_variant
     {
         // Get all sequence attribute types
-        typedef typename get_kwd_parser_types<L, R, Context, Attribute>::type all_types;
+        typedef typename get_kwd_parser_types<L, R, Context, Attribute,0>::type all_types;
 
         typedef typename make_variant_over<all_types>::type type;
 

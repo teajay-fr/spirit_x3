@@ -56,18 +56,21 @@ main()
 
     using boost::spirit::x3::omit;
     using boost::spirit::x3::int_;
+    using boost::spirit::x3::short_;
+    using boost::spirit::x3::double_;
     using boost::spirit::x3::lit;
     using boost::spirit::x3::lexeme;
     //using boost::spirit::x3::kwd;
 
 
   {
-        boost::fusion::vector<int,int> data;
-        BOOST_TEST( test_attr("b=1", lit("c")->*('=' > int_) / lit("b")->*('='>int_), data, space ));
+   //     boost::fusion::vector<int,int> data;
+   //     BOOST_TEST( test_attr("b=1", lit("c")->*('=' > int_) / lit("b")->*('='>int_), data, space ));
+   //     std::cout<<data<<std::endl;
    }
   {
-        boost::fusion::vector<int,int,int> data;
-        BOOST_TEST( test_attr("c=1", lit("c")->*('=' > int_) / lit("b")->*('='>int_) / lit("d")->*('='>int_) ,data, space ));
+        boost::fusion::vector<int,short,double> data;
+        BOOST_TEST( test_attr("c=1", lit("c")->*( int_) / lit("b")->*('='>short_) / lit("d")->*('=' > double_) ,data, space ));
         std::cout<<data<<std::endl;
         // no constraints
         //boost::fusion::vector<char,char,int> data;
