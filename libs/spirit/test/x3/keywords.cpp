@@ -70,7 +70,7 @@ main()
    }
   {
         boost::fusion::vector<int,short,double> data;
-        BOOST_TEST( test_attr("c=1", lit("c")->*( int_) / lit("b")->*('='>short_) / lit("d")->*('=' > double_) ,data, space ));
+        BOOST_TEST( test_attr("d=1", lit("c")->*( '=' >> int_) / lit("a")->*( '3') / lit("b")->*('='>short_) / lit("d")->*('=' > double_) / lit("f")->*('a') ,data, space ));
         std::cout<<data<<std::endl;
         // no constraints
         //boost::fusion::vector<char,char,int> data;

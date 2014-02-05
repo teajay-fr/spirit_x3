@@ -61,9 +61,8 @@ namespace boost { namespace spirit { namespace x3
             Iterator& first, Iterator const& last
           , Context const& context, Attribute& attr) const
         {
-
-          typedef detail::get_kwd_parser_types<Left, Right, Context, Attribute,0> parser_types;
-          typedef typename make_variant_over<typename parser_types::type>::type parser_variant;
+          typedef detail::get_kwd_parser_types2<Left, Right, Context, Attribute> parser_types;
+          typedef typename make_variant_over< typename parser_types::type>::type parser_variant;
           typedef tst<char, parser_variant> Lookup;
           static Lookup lookup;
           if(lookup.empty())
