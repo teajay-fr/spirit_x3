@@ -136,44 +136,21 @@ namespace boost { namespace spirit { namespace x3 { namespace detail
       , typename enable_if_c<(Parser::Right::is_pass_through_unary)>::type>
       : pass_keyword_attribute_subject<typename Parser::Right, Attribute> {};
 
-    template <typename Attribute, int Start, int End, typename ResultType>
-    struct get_attribute
-    {
-      static ResultType &call(Attribute &s)
-      {
-        auto i = fusion::begin(s);
-        return ResultType(fusion::advance_c<Start>(i),fusion::advance_c<End>(i));
-      }
-    };
-
     template <typename Attribute, int Start, int End, typename Result>
-    struct get_attribute_2
+    struct get_attribute
     {
       typedef typename fusion::result_of::at_c<Attribute,Start>::type type;
       static typename add_reference<type>::type call(Attribute &s)
       {
         // auto i = fusion::begin(s);
-        //return Result(fusion::advance_c<Start>(i),fusion::advance_c<End>(i));
+      //  return Result(fusion::advance_c<Start>(i),fusion::advance_c<End>(i));
        // return fusion::front(fusion::deref(fusion::advance_c<Start>(i)));
         return fusion::at_c<Start>(s);
       }
     };
-/*
-    template <typename Attribute, int Start, int End, typename Result>
-    struct get_attribute_2<Attribute,Start,End, Result,
-        typename enable_if_c<
-                ( fusion::result_of::size<Attribute>::value == End) && !boost::is_same<unused_type, Result>::value >::type >
-    {
-      static Result call(Attribute &s)
-      {
-//       auto i = fusion::begin(s);
-       //return Result(fusion::advance_c<Start>(i),fusion::end(s));
-        return Result(fusion::at_c<Start>(s));
-      }
-    };*/
 
      template <typename Attribute, int Start, int End>
-    struct get_attribute_2<Attribute, Start, End, unused_type >
+    struct get_attribute<Attribute, Start, End, unused_type >
     {
       typedef unused_type type;
       static unused_type call(Attribute &s)
@@ -241,7 +218,7 @@ namespace boost { namespace spirit { namespace x3 { namespace detail
       static int const l_size = keyword_list_size<L, Context>::value;
       static int const r_size = keyword_list_size<R, Context>::value;
 
-      typedef get_attribute_2<Attribute, l_size, l_size+r_size, right_attribute_type> get_right_attribute;
+      typedef get_attribute<Attribute, l_size, l_size+r_size, right_attribute_type> get_right_attribute;
       typedef keyword_parser_holder< typename R::right_type, get_right_attribute> right_kwd_parser_holder;
 
       typedef get_kwd_parser_types<
@@ -282,8 +259,8 @@ namespace boost { namespace spirit { namespace x3 { namespace detail
       static int const l_size = keyword_list_size<L, Context>::value;
       static int const r_size = keyword_list_size<R, Context>::value;
 
-      typedef get_attribute_2<Attribute, l_size, l_size+r_size, right_attribute_type> get_right_attribute;
-      typedef get_attribute_2<Attribute, 0, l_size, left_attribute_type> get_left_attribute;
+      typedef get_attribute<Attribute, l_size, l_size+r_size, right_attribute_type> get_right_attribute;
+      typedef get_attribute<Attribute, 0, l_size, left_attribute_type> get_left_attribute;
       typedef keyword_parser_holder< typename R::right_type, get_right_attribute> right_kwd_parser_holder;
       typedef keyword_parser_holder< typename L::right_type, get_left_attribute> left_kwd_parser_holder;
 
