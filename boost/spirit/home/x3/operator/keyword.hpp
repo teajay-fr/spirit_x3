@@ -61,7 +61,7 @@ namespace boost { namespace spirit { namespace x3
             Iterator& first, Iterator const& last
           , Context const& context, Attribute& attr) const
         {
-          typedef detail::get_kwd_parser_types2<Left, Right, Context, Attribute> parser_types;
+          typedef detail::get_kwd_parser_types<Left, Right, Context, Attribute> parser_types;
           typedef typename make_variant_over< typename parser_types::type>::type parser_variant;
           typedef tst<char, parser_variant> Lookup;
           static Lookup lookup;
@@ -69,16 +69,18 @@ namespace boost { namespace spirit { namespace x3
             {
               parser_types::add_keyword(lookup,*this);
             }
-
-//          parser_types subject;
+            bool success = false;
             x3::skip_over(first, last, context);
-            if(parser_variant *subparser =
+            while(parser_variant *subparser =
                     lookup.find(first,last,tst_pass_through()))
             {
-                return boost::apply_visitor(
-                      detail::keyword_parse_visitor<Iterator,Context,Attribute>(first,last,context,attr),*subparser);
+                if(!boost::apply_visitor(
+                      detail::keyword_parse_visitor<Iterator,Context,Attribute>(first,last,context,attr),*subparser))
+                  return false;
+                x3::skip_over(first, last, context);
+                success = true;
             }
-            return false;
+            return success;
         }
     };
 

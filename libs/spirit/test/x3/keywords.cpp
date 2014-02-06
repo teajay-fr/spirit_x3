@@ -64,21 +64,39 @@ main()
 
 
   {
-   //     boost::fusion::vector<int,int> data;
-   //     BOOST_TEST( test_attr("b=1", lit("c")->*('=' > int_) / lit("b")->*('='>int_), data, space ));
-   //     std::cout<<data<<std::endl;
+      boost::fusion::vector<int,int> data;
+      BOOST_TEST( test_attr("b=2", lit("c")->*('=' > int_) / lit("b")->*('='>int_), data, space ));
+      BOOST_TEST( boost::fusion::at_c<0>(data) == 0);
+      BOOST_TEST( boost::fusion::at_c<1>(data) == 2);
    }
   {
         boost::fusion::vector<int,short,double> data;
-        BOOST_TEST( test_attr("d=1", lit("c")->*( '=' >> int_) / lit("a")->*( '3') / lit("b")->*('='>short_) / lit("d")->*('=' > double_) / lit("f")->*('a') ,data, space ));
-        std::cout<<data<<std::endl;
-        // no constraints
-        //boost::fusion::vector<char,char,int> data;
-        //BOOST_TEST( test_attr("c=1 a=a", kwd("a")[ '=' > char_] / kwd("b")[ '=' > char_] / kwd("c")['=' > int_], data, space));
-        //BOOST_TEST( boost::fusion::at_c<0>(data) == 'a' );
-        //BOOST_TEST( boost::fusion::at_c<1>(data) == 0 );
-        //BOOST_TEST( boost::fusion::at_c<2>(data) == 1 );
-    }
+        BOOST_TEST( test_attr("d=1.4", lit("c")->*( '=' >> int_) / lit("a")->*( '3') / lit("b")->*('='>short_) / lit("d")->*('=' > double_) / lit("f")->*('a') ,data, space ));
+        BOOST_TEST( boost::fusion::at_c<0>(data)==0);
+        BOOST_TEST( boost::fusion::at_c<1>(data)==0);
+        BOOST_TEST( boost::fusion::at_c<2>(data)==1.4);
+  }
+  {
+        boost::fusion::vector<int,short,double> data;
+        BOOST_TEST( test_attr("c=1 d=43.2", lit("c")->*( '=' >> int_) / lit("a")->*( '3') / lit("b")->*('='>short_) / lit("d")->*('=' > double_) / lit("f")->*('a') ,data, space ));
+        BOOST_TEST( boost::fusion::at_c<0>(data)==1);
+        BOOST_TEST( boost::fusion::at_c<1>(data)==0);
+        BOOST_TEST( boost::fusion::at_c<2>(data)==43.2);
+}
+  {
+        boost::fusion::vector<int,short,double> data;
+        BOOST_TEST( test_attr("c=1 b=43", lit("c")->*( '=' >> int_) / lit("a")->*( '3') / lit("b")->*('='>short_) / lit("d")->*('=' > double_) / lit("f")->*('a') ,data, space ));
+        BOOST_TEST( boost::fusion::at_c<0>(data)==1);
+        BOOST_TEST( boost::fusion::at_c<1>(data)==43);
+        BOOST_TEST( boost::fusion::at_c<2>(data)==0);
+}
+  {
+        boost::fusion::vector<int,short,double> data;
+        BOOST_TEST( test_attr("a3 fa", lit("c")->*( '=' >> int_) / lit("a")->*( '3') / lit("b")->*('='>short_) / lit("d")->*('=' > double_) / lit("f")->*('a') ,data, space ));
+        BOOST_TEST( boost::fusion::at_c<0>(data)==0);
+        BOOST_TEST( boost::fusion::at_c<1>(data)==0);
+        BOOST_TEST( boost::fusion::at_c<2>(data)==0);
+}
 #if 0
         BOOST_TEST( test("a=a c=1", kwd("a")[ '=' > char_] / kwd("b")[ '=' > char_] / kwd("c")['=' > int_], space));
 
