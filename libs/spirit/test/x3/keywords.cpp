@@ -60,7 +60,7 @@ main()
     using boost::spirit::x3::double_;
     using boost::spirit::x3::lit;
     using boost::spirit::x3::lexeme;
-    //using boost::spirit::x3::kwd;
+    using boost::spirit::x3::kwd;
 
 
   {
@@ -97,6 +97,14 @@ main()
         BOOST_TEST( boost::fusion::at_c<1>(data)==0);
         BOOST_TEST( boost::fusion::at_c<2>(data)==0);
 }
+  {
+        boost::fusion::vector<int,short,double> data;
+        BOOST_TEST( test_attr("a3 fa", kwd("c")[ '=' >> int_] / kwd("a")[ '3' ] / kwd("b")['='>short_] / kwd("d")['=' > double_] / kwd("f")['a'],data, space ));
+        BOOST_TEST( boost::fusion::at_c<0>(data)==0);
+        BOOST_TEST( boost::fusion::at_c<1>(data)==0);
+        BOOST_TEST( boost::fusion::at_c<2>(data)==0);
+}
+
 #if 0
         BOOST_TEST( test("a=a c=1", kwd("a")[ '=' > char_] / kwd("b")[ '=' > char_] / kwd("c")['=' > int_], space));
 
@@ -118,16 +126,17 @@ main()
         BOOST_TEST(!test("b=c b=e c=1", kwd("a",1,inf)[ '=' > char_] / kwd("b",0,inf)[ '=' > char_] / kwd("c",1,inf)['=' > int_], space ));
         BOOST_TEST(test("a=f a=f a=g b=c b=e c=1 a=e", kwd("a",1,inf)[ '=' > char_] / kwd("b",0,inf)[ '=' > char_] / kwd("c",1,inf)['=' > int_], space ));
     }
+#endif
 
     {   // Single keyword, empty string
-        BOOST_TEST(test(" ", kwd("aad")[char_],space));
+        BOOST_TEST(test(" ", lit("aad")->*(char_),space));
         // Single keyword
-        BOOST_TEST(test("aad E ", kwd("aad")[char_],space));
+        BOOST_TEST(test("aad E ", lit("aad")->*(char_),space));
         // Single no case keyword
-        BOOST_TEST(test("AaD E ", ikwd("aad")[char_],space));
+    //    BOOST_TEST(test("AaD E ", ikwd("aad")[char_],space));
 
     }
-
+#if 0
     {
         // Vector container
         boost::fusion::vector<std::vector<int>,std::vector<int>,std::vector<int> > data;

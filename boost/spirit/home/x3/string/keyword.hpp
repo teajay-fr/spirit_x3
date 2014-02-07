@@ -25,56 +25,63 @@
 #include <string>
 
 
-namespace boost { namespace spirit { namespace x3
-{
+namespace boost { namespace spirit { namespace x3 {
 
-template <typename Left, typename Right>
-struct keyword_parser : binary_parser<Left,Right, keyword_parser<Left,Right>>
-{
-    typedef binary_parser<Left, Right, keyword_parser<Left,Right> > base_type;
-    static const bool has_attribute = true;
-    static const bool is_keyword = true;
-    keyword_parser(Left const& left, Right const& right)
-      : base_type(left,right) {}
+     template <typename Left, typename Right>
+     struct keyword_parser : binary_parser<Left,Right, keyword_parser<Left,Right>>
+     {
+       typedef binary_parser<Left, Right, keyword_parser<Left,Right> > base_type;
+       static const bool has_attribute = true;
+       static const bool is_keyword = true;
+       keyword_parser(Left const& left, Right const& right)
+         : base_type(left,right) {}
 
-    template <typename Iterator, typename Context, typename Attribute>
-    bool parse(Iterator& first, Iterator const& last
-      , Context const& context, Attribute& attr) const
-    {
-        Iterator save = first;
-        if (! this->left.parse(first, last, context, unused))
-        {
-            first = save;
-            return false;
-        }
-        return this->right.parse(first,last,context,attr);
-    }
-};
+       template <typename Iterator, typename Context, typename Attribute>
+       bool parse(Iterator& first, Iterator const& last
+                  , Context const& context, Attribute& attr) const
+       {
+         Iterator save = first;
+         if (! this->left.parse(first, last, context, unused))
+           {
+             first = save;
+             return false;
+           }
+         return this->right.parse(first,last,context,attr);
+       }
+     };
+     struct kwd_gen
+     {
 
-template <typename Subject1>
-struct kwd_gen
-{
-    kwd_gen(Subject1 const& sub1)
-        :first_subject(sub1)
-    {
-    }
+       template <typename Subject1>
+       struct kwd_lvl1
+       {
+         kwd_lvl1(Subject1 const& sub1)
+           :first_subject(sub1)
+         {
+         }
 
-    template <typename Subject2>
-    keyword_parser< typename extension::as_parser<Subject1>::value_type
-                    ,typename extension::as_parser<Subject2>::value_type >
-    operator()(Subject2 const& subject) const
-    {
-        typedef
-            keyword_parser<typename extension::as_parser<Subject1>::value_type
-                          ,typename extension::as_parser<Subject2>::value_type >
-        result_type;
+         template <typename Subject2>
+         keyword_parser< typename extension::as_parser<Subject1>::value_type
+         ,typename extension::as_parser<Subject2>::value_type >
+         operator[](Subject2 const& subject) const
+         {
+           typedef
+           keyword_parser<typename extension::as_parser<Subject1>::value_type
+               ,typename extension::as_parser<Subject2>::value_type >
+               result_type;
 
-        return result_type(as_parser(first_subject),as_parser(subject));
-    }
-    Subject1 first_subject;
-};
-
-
+           return {as_parser(first_subject),as_parser(subject)};
+         }
+         Subject1 first_subject;
+       };
+       template <typename Subject1>
+       kwd_lvl1<typename extension::as_parser<Subject1>::value_type >
+       operator()(Subject1 const &sub1) const
+       {
+         return as_parser(sub1);
+       }
+     };
+     kwd_gen const kwd = kwd_gen();
 }}}
 
 #endif
