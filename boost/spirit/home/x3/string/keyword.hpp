@@ -53,9 +53,9 @@ namespace boost { namespace spirit { namespace x3 {
      {
 
        template <typename Subject1>
-       struct kwd_lvl1
+       struct kwd_level_1
        {
-         kwd_lvl1(Subject1 const& sub1)
+         kwd_level_1(Subject1 const& sub1)
            :first_subject(sub1)
          {
          }
@@ -75,7 +75,7 @@ namespace boost { namespace spirit { namespace x3 {
          Subject1 first_subject;
        };
        template <typename Subject1>
-       kwd_lvl1<typename extension::as_parser<Subject1>::value_type >
+       kwd_level_1<typename extension::as_parser<Subject1>::value_type >
        operator()(Subject1 const &sub1) const
        {
          return as_parser(sub1);

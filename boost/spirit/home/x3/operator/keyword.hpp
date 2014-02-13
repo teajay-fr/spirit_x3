@@ -23,7 +23,6 @@ namespace boost { namespace spirit { namespace x3
     template <typename Left, typename Right>
     struct keyword : binary_parser< Left, Right, keyword<Left , Right>>
     {
-      //typedef typename Left::sa asd;
         typedef binary_parser<Left, Right, keyword< Left, Right>> base_type;
 
         static const bool is_keyword = false;
@@ -31,31 +30,6 @@ namespace boost { namespace spirit { namespace x3
             : base_type(left, right) {
 
         }
-#if 0
-        template <typename Iterator, typename Context, typename Attribute>
-        bool parse(
-            Iterator& first, Iterator const& last
-          , Context const& context, Attribute& attr) const
-        {
-//          typedef typename Left::dd dd;
-            return this->left.parse(first,last,context,attr);
-//            return false;
-        }
-
-    };
-    template <typename Left, typename Right>
-    struct parsing_keyword : binary_parser< Left, Right, parsing_keyword<Left , Right>>
-    {
-        typedef binary_parser<Left, Right, parsing_keyword< Left, Right>> base_type;
-
-
-        static const bool is_keyword = false;
-        parsing_keyword(Left left, Right right)
-            : base_type(left, right)
-        {
-
-        }
-#endif
 
         template <typename Iterator, typename Context>
         bool parse(
@@ -116,15 +90,6 @@ namespace boost { namespace spirit { namespace x3
     {
         return {as_parser(left), as_parser(right)};
     }
-/*    template <typename LeftKey, typename LeftSubject, typename RightKey, typename RightSubject>
-    inline parsing_keyword<
-          typename extension::as_parser< keyword_parser<LeftKey,LeftSubject> >::value_type
-        , typename extension::as_parser< keyword_parser<RightKey,RightSubject> >::value_type>
-    operator/(keyword_parser<LeftKey, LeftSubject> const &left, keyword_parser<RightKey, RightSubject> const &right)
-    {
-
-       return {as_parser(left),as_parser(right)};
-    }*/
 }}}
 
 namespace boost { namespace spirit { namespace x3 { namespace traits
@@ -133,9 +98,6 @@ namespace boost { namespace spirit { namespace x3 { namespace traits
     struct attribute_of<x3::keyword<keyword_parser<LeftKey,LeftSubject>, keyword_parser<RightKey,RightSubject>>, Context>
         : x3::detail::attribute_of_sequence<LeftSubject, RightSubject, Context> {};
 
-    template <typename LeftKey, typename LeftSubject, typename RightKey, typename RightSubject, typename Context>
-    struct attribute_of<x3::parsing_keyword<keyword_parser<LeftKey,LeftSubject>, keyword_parser<RightKey,RightSubject>>, Context>
-        : x3::detail::attribute_of_sequence<LeftSubject, RightSubject, Context> {};
 }}}}
 
 #endif
