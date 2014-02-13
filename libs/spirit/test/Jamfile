@@ -134,6 +134,7 @@ rule compile-fail ( sources + : requirements * : target-name ? )
      #~ [ run x3/utree2.cpp           : : : : x3_utree2 ]
      #~ [ run x3/utree3.cpp           : : : : x3_utree3 ]
      #~ [ run x3/utree4.cpp           : : : : x3_utree4 ]
+     [ run x3/keywords.cpp         : : : : x3_keywords ]
 
     ;
 
