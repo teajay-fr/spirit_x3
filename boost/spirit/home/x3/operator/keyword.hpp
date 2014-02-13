@@ -70,7 +70,6 @@ namespace boost { namespace spirit { namespace x3
             {
               parser_types::add_keyword(lookup,*this);
             }
-            bool success = false;
             x3::skip_over(first, last, context);
             while(parser_variant *subparser =
                     lookup.find(first,last,tst_pass_through()))
@@ -79,9 +78,8 @@ namespace boost { namespace spirit { namespace x3
                       detail::keyword_parse_visitor_unused<Iterator,Context>(first,last,context),*subparser))
                   return false;
                 x3::skip_over(first, last, context);
-                success = true;
             }
-            return success;
+            return true;
         }
 
         template <typename Iterator, typename Context, typename Attribute>
@@ -97,7 +95,6 @@ namespace boost { namespace spirit { namespace x3
             {
               parser_types::add_keyword(lookup,*this);
             }
-            bool success = false;
             x3::skip_over(first, last, context);
             while(parser_variant *subparser =
                     lookup.find(first,last,tst_pass_through()))
@@ -106,9 +103,8 @@ namespace boost { namespace spirit { namespace x3
                       detail::keyword_parse_visitor<Iterator,Context,Attribute>(first,last,context,attr),*subparser))
                   return false;
                 x3::skip_over(first, last, context);
-                success = true;
             }
-            return success;
+            return true;
         }
     };
 
