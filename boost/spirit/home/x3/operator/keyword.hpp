@@ -56,6 +56,34 @@ namespace boost { namespace spirit { namespace x3
 
         }
 #endif
+
+        template <typename Iterator, typename Context>
+        bool parse(
+            Iterator& first, Iterator const& last
+          , Context const& context, unused_type) const
+        {
+          typedef detail::get_kwd_parser_types<Left, Right, Context, unused_type> parser_types;
+          typedef typename make_variant_over< typename parser_types::type>::type parser_variant;
+          typedef tst<char, parser_variant> Lookup;
+          static Lookup lookup;
+          if(lookup.empty())
+            {
+              parser_types::add_keyword(lookup,*this);
+            }
+            bool success = false;
+            x3::skip_over(first, last, context);
+            while(parser_variant *subparser =
+                    lookup.find(first,last,tst_pass_through()))
+            {
+                if(!boost::apply_visitor(
+                      detail::keyword_parse_visitor_unused<Iterator,Context>(first,last,context),*subparser))
+                  return false;
+                x3::skip_over(first, last, context);
+                success = true;
+            }
+            return success;
+        }
+
         template <typename Iterator, typename Context, typename Attribute>
         bool parse(
             Iterator& first, Iterator const& last

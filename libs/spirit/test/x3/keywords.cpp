@@ -62,7 +62,6 @@ main()
     using boost::spirit::x3::lexeme;
     using boost::spirit::x3::kwd;
 
-
   {
       boost::fusion::vector<int,int> data;
       BOOST_TEST( test_attr("b=2", lit("c")->*('=' > int_) / lit("b")->*('='>int_), data, space ));
@@ -105,11 +104,10 @@ main()
         BOOST_TEST( boost::fusion::at_c<2>(data)==0);
 }
 
-#if 0
         BOOST_TEST( test("a=a c=1", kwd("a")[ '=' > char_] / kwd("b")[ '=' > char_] / kwd("c")['=' > int_], space));
 
         BOOST_TEST( test("", kwd("a")[ '=' > char_] / kwd("b")[ '=' > char_] / kwd("c")['=' > int_], space));
-
+#if 0
         // Exact
         BOOST_TEST(test("a=a b=b c=1", kwd("a",1)[ '=' > char_] / kwd("b")[ '=' > char_] / kwd("c")['=' > int_], space));
         BOOST_TEST(test("a=a b=c b=e c=1", kwd("a",1)[ '=' > char_] / kwd("b",2)[ '=' > char_] / kwd("c")['=' > int_], space));
@@ -127,16 +125,15 @@ main()
         BOOST_TEST(test("a=f a=f a=g b=c b=e c=1 a=e", kwd("a",1,inf)[ '=' > char_] / kwd("b",0,inf)[ '=' > char_] / kwd("c",1,inf)['=' > int_], space ));
     }
 #endif
-
     {   // Single keyword, empty string
-        BOOST_TEST(test(" ", lit("aad")->*(char_),space));
+//        BOOST_TEST(test(" ", lit("aad")->*(char_),space));
         // Single keyword
         BOOST_TEST(test("aad E ", lit("aad")->*(char_),space));
         // Single no case keyword
     //    BOOST_TEST(test("AaD E ", ikwd("aad")[char_],space));
 
     }
-#if 0
+
     {
         // Vector container
         boost::fusion::vector<std::vector<int>,std::vector<int>,std::vector<int> > data;
@@ -153,6 +150,7 @@ main()
             );
     }
 
+#if 0
     {
         // no_case test
         BOOST_TEST( test("B=a c=1 a=E", no_case[kwd("a")[ "=E" ] / kwd("b")[ '=' > char_] / kwd("c")['=' > int_]], space));
@@ -163,13 +161,14 @@ main()
         BOOST_TEST( test("A=a c=1 a=E", ikwd("a")[ '=' > char_] / kwd("b")[ '=' > char_] / kwd("c")['=' > int_], space));
         BOOST_TEST( !test("A=a C=1 a=E", ikwd("a")[ '=' > char_] / kwd("b")[ '=' > char_] / kwd("c")['=' > int_], space));
     }
+#endif
 
     {
         // iterator restoration
-        BOOST_TEST( test("a=a c=1 ba=d", (kwd("a")[ '=' > char_] / kwd("b")[ '=' > int_] / kwd("c")['=' > int_] ) > lit("ba=") > char_, space));
-        BOOST_TEST( test("A=a c=1 ba=d", (ikwd("a")[ '=' > char_] / kwd("b")[ '=' > int_] / kwd("c")['=' > int_] ) > lit("ba=") > char_, space));
+       // BOOST_TEST( test("a=a c=1 ba=d", (kwd("a")[ '=' > char_] / kwd("b")[ '=' > int_] / kwd("c")['=' > int_] ) > lit("ba=") > char_, space));
+        //BOOST_TEST( test("A=a c=1 ba=d", (ikwd("a")[ '=' > char_] / kwd("b")[ '=' > int_] / kwd("c")['=' > int_] ) > lit("ba=") > char_, space));
     }
-
+#if 0
     { // actions
         namespace phx = boost::phoenix;
 
@@ -177,7 +176,6 @@ main()
         BOOST_TEST(test("b=2 c=4", kwd("b")['=' > int_][phx::ref(v)=_1] / kwd("c")[ '=' > int_ ],space) &&
             v[0] == 2 );
     }
-
 
     {
         // no constraints
@@ -287,7 +285,6 @@ main()
 //        test_attr("a = b c = d", kwd("a")['=' > char_] / kwd("c")['=' > char_], x);
     }
 #endif
-
    return boost::report_errors();
 }
 

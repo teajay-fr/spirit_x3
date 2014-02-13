@@ -136,7 +136,31 @@ namespace boost { namespace spirit { namespace x3 { namespace detail
       , typename enable_if_c<(Parser::Right::is_pass_through_unary)>::type>
       : pass_keyword_attribute_subject<typename Parser::Right, Attribute> {};
 
+    /*
+    template <typename Attribute, int Start, int End, typename Result, typename Enable = void>
+    struct get_attribute
+    {
+      typedef unused_type type;
+      static unused_type call(Attribute &s)
+      {
+        return unused_type();
+      }
+    };
+
     template <typename Attribute, int Start, int End, typename Result>
+    struct get_attribute<Attribute, Start, End, Result, typename enable_if_c< (!is_same<Attribute, const unused_type>::value) >::type >
+    {
+      typedef typename fusion::result_of::at_c<Attribute,Start>::type type;
+      static typename add_reference<type>::type call(Attribute &s)
+      {
+        // auto i = fusion::begin(s);
+      //  return Result(fusion::advance_c<Start>(i),fusion::advance_c<End>(i));
+       // return fusion::front(fusion::deref(fusion::advance_c<Start>(i)));
+        return fusion::at_c<Start>(s);
+      }
+
+    };*/
+    template <typename Attribute, int Start, int End, typename Result, typename Enable = void>
     struct get_attribute
     {
       typedef typename fusion::result_of::at_c<Attribute,Start>::type type;
@@ -147,17 +171,26 @@ namespace boost { namespace spirit { namespace x3 { namespace detail
        // return fusion::front(fusion::deref(fusion::advance_c<Start>(i)));
         return fusion::at_c<Start>(s);
       }
-    };
 
-     template <typename Attribute, int Start, int End>
-    struct get_attribute<Attribute, Start, End, unused_type >
-    {
-      typedef unused_type type;
-      static unused_type call(Attribute &s)
-      {
-        return unused;
-      }
     };
+    template <typename Attribute, int Start, int End, typename Result>
+   struct get_attribute<Attribute, Start, End, Result, typename enable_if_c<
+       (is_same<Attribute, unused_type>::value || is_same<Result, unused_type>::value)>::type >
+   {
+     typedef unused_type type;
+     static unused_type call(Attribute &s)
+     {
+       return unused;
+     }
+   };
+#if 0
+  template <typename Attribute, int Start, int End, typename Result>
+   struct get_attribute :
+  mpl::if_<
+            is_same< const x3::unused_type, Attribute>
+          , get_attribute_unused
+          , get_attribute_used<Attribute, Start, End, Result >>::type {};
+#endif
   template <typename L, typename R, typename Attribute, typename Context, int Offset
       , typename Enable = void>
     struct partition_keyword_attribute
@@ -308,6 +341,31 @@ namespace boost { namespace spirit { namespace x3 { namespace detail
 
     };
 
+
+    template <typename Iterator, typename Context>
+    struct keyword_parse_visitor_unused : boost::static_visitor<bool>
+    {
+        keyword_parse_visitor_unused(Iterator &first, Iterator const& last, Context const& context)
+          : first(first)
+          , last(last)
+          , context(context)
+        {
+
+        }
+        template <typename Parser>
+        bool operator()(Parser &parser) const
+        {
+          Iterator save = first;
+          if (parser.parser->parse(first, last, context, unused))
+              return true;
+          first = save;
+          return false;
+        }
+        Iterator & first;
+        Iterator const& last;
+        Context const& context;
+    };
+
     template <typename Iterator, typename Context, typename Attribute>
     struct keyword_parse_visitor : boost::static_visitor<bool>
     {
@@ -320,18 +378,16 @@ namespace boost { namespace spirit { namespace x3 { namespace detail
         {
 
         }
-
         template <typename Parser>
-        bool operator()(Parser parser) const
+        bool operator()(Parser &parser) const
         {
-
-                typedef typename Parser::partition_attribute partition_attribute;
-                typename partition_attribute::type current_attr = partition_attribute::call(attr);
-                Iterator save = first;
-                if (parser.parser->parse(first, last, context, current_attr))
-                    return true;
-                first = save;
-                return false;
+          typedef typename Parser::partition_attribute partition_attribute;
+          typename partition_attribute::type current_attr = partition_attribute::call(attr);
+          Iterator save = first;
+          if (parser.parser->parse(first, last, context, current_attr))
+              return true;
+          first = save;
+          return false;
         }
         Iterator & first;
         Iterator const& last;
